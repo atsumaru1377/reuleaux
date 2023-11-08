@@ -69,7 +69,7 @@ const Reuleaux: React.FC = () => {
 
 		const reuleauxPoints = makeReuleaux(width*1/8, height*1/8, 40, 200);
 
-		const reuleaux = Bodies.fromVertices(width*1/8, height*1/8, reuleauxPoints, {
+		const reuleaux = Bodies.fromVertices(width*1/8, height*1/8, [reuleauxPoints], {
 			friction: 0.001,
 			render: { fillStyle: '#ff9999' }
 		});
@@ -81,11 +81,8 @@ const Reuleaux: React.FC = () => {
 
 		return () => {
 			Render.stop(render);
-			World.clear(engine.world);
 			Engine.clear(engine);
 			render.canvas.remove();
-			render.canvas = null;
-			render.context = null;
 			render.textures = {};
 		};
 	}, []);
