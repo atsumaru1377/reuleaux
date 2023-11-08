@@ -5,7 +5,7 @@ Make a reuleaux triangle which roll between two walls which lean 30 degrees from
 
 import React from 'react';
 import { useEffect, useRef } from 'react';
-import { Engine, Render, World, Bodies, Body, Events, Composite, Runner } from 'matter-js';
+import { Engine, Render, World, Bodies, Body, Events, Composite, Runner, Mouse, MouseConstraint, Common } from 'matter-js';
 
 const makeReuleaux = (x:number, y:number, radius:number, sides:number) => {
 	const points = [];
@@ -61,7 +61,7 @@ const Reuleaux: React.FC = () => {
 			angle: Math.PI * 1 / 12,
 			render: { fillStyle: '#99ffff' }
 		})
-		const slopeCeil = Bodies.rectangle(width*1/2, height*2/4 - 60, width*1/2, 20, {
+		const slopeCeil = Bodies.rectangle(width*1/2, height*2/4 - 40 - 20 / Math.cos(Math.PI * 1 / 12), width*1/2, 20, {
 			isStatic: true,
 			angle: Math.PI * 1 / 12,
 			render: { fillStyle: '#99ffff' }
@@ -71,11 +71,35 @@ const Reuleaux: React.FC = () => {
 
 		const reuleaux = Bodies.fromVertices(width*1/8, height*1/8, [reuleauxPoints], {
 			friction: 0.001,
-			render: { fillStyle: '#ff9999' }
+			render: { fillStyle: '#ff9999' },
+
 		});
 
+		const reuleauxs = []
+		for (let i = 0; i < 8; i++) {
+			reuleauxs.push(
+				Bodies.fromVertices(Common.random(0, width), Common.random(0, height), [reuleauxPoints], {
+					friction: 0.001,
+					render: { fillStyle: '#ff9999' },
+				})
+			)
+		}
+
 		// Create boundary
-		World.add(world, [leftWall, rightWall, ground, slope, slopeCeil, reuleaux]);
+		Composite.add(world, [leftWall, rightWall, ground, slope, slopeCeil]);
+		Composite.add(world, [reuleaux])
+		Composite.add(world, reuleauxs)
+		const mouse = Mouse.create(render.canvas);
+		const mouseConstraint = MouseConstraint.create(engine,{
+			mouse: mouse,
+			constraint: {
+				stiffness : 0.2,
+				render : {
+					visible: false
+				}
+			}
+		})
+		Composite.add(world, mouseConstraint)
 		Render.run(render);
 		Engine.run(engine);
 
